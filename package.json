@@ -1,0 +1,30 @@
+{
+  "name": "@7polo/editorjs-code",
+  "version": "1.0.8",
+  "keywords": [
+    "code editor",
+    "editor.js",
+    "editorjs"
+  ],
+  "description": "Code for Editor.js",
+  "license": "MIT",
+  "repository": "",
+  "main": "./dist/bundle.js",
+  "scripts": {
+    "build": "webpack --mode production",
+    "build:dev": "webpack --mode development --watch"
+  },
+  "author": {
+    "name": "Code",
+    "email": "apologizebao@163.com"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.3.4",
+    "@babel/preset-env": "^7.3.4",
+    "babel-loader": "^8.0.5",
+    "css-loader": "^3.5.3",
+    "style-loader": "^1.2.1",
+    "webpack": "^4.29.5",
+    "webpack-cli": "^3.2.3"
+  }
+}

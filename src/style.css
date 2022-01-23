@@ -1,0 +1,24 @@
+.code_holder {
+    display: block;
+}
+
+.code_holder > code {
+    display: inline-block;
+    width: 100%;
+    border: none !important;
+    outline: none !important;
+}
+
+.code-toolbar > pre {
+    padding-top: 1.5em !important;
+}
+
+.code-toolbar > pre > .line-numbers-rows {
+    padding-top: 1.5em !important;
+    margin-top: 0 !important;
+}
+
+div.code-toolbar > .toolbar {
+    opacity: 1 !important;
+}
+
