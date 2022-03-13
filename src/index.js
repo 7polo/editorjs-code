@@ -1,12 +1,10 @@
 /**
  * Editor 代码编辑器
  */
-// require('./style.css').toString();
+import './style.css';
 
-import './style.css'
-
-import {Highlight} from "./highlight";
-import {getString, htmlEncode, make} from "./common/utils";
+import {Highlight} from './highlight';
+import {getString, htmlEncode, make} from './common/utils';
 
 export default class Code {
 
@@ -63,29 +61,29 @@ export default class Code {
 
     render() {
         const cls = `language-${this.data.language}`
-        const codeHolder = make('pre', [`code_holder line-numbers ${cls}`])
+        const codeHolder = make('pre', [`code_holder line-numbers ${cls}`]);
         this.codeArea = make('code', [cls], {
             spellcheck: false,
             contenteditable: !this.readOnly,
             'data-dependencies': this.data.language
-        })
+        });
 
         this.codeArea.innerHTML = htmlEncode(this.data.code);
         codeHolder.appendChild(this.codeArea);
 
         this.api.listeners.on(this.codeArea, 'input', () => this.toHighlight(), false);
         this.api.listeners.on(this.codeArea, 'paste', event => this.handlePaste(event), false);
-        this.initHighlightRender()
+        this.initHighlightRender();
         return codeHolder;
     }
 
     initHighlightRender() {
         const timer = setInterval(() => {
             if (this.highlight.isReady()) {
-                this.toHighlight()
-                clearInterval(timer)
+                this.toHighlight();
+                clearInterval(timer);
             }
-        }, 50)
+        }, 50);
     }
 
     destroy() {
@@ -94,7 +92,7 @@ export default class Code {
     }
 
     toHighlight() {
-        this.highlight.toHighlight(this.codeArea)
+        this.highlight.toHighlight(this.codeArea);
     }
 
     handlePaste(e) {
@@ -102,21 +100,21 @@ export default class Code {
         e.preventDefault();
         // 去除复制带过来的样式
         let clp = (e.originalEvent || e).clipboardData;
-        let text = clp ? clp.getData('text/plain') : window.clipboardData.getData("text")
+        let text = clp ? clp.getData('text/plain') : window.clipboardData.getData("text");
         if (text) {
-            const textNode = document.createTextNode(this.transform(text, true))
+            const textNode = document.createTextNode(this.transform(text, true));
             if (window.getSelection()) {
                 const range = window.getSelection().getRangeAt(0);
-                range.deleteContents()
+                range.deleteContents();
                 range.insertNode(textNode);
             } else {
-                this.codeArea.appendChild(textNode)
+                this.codeArea.appendChild(textNode);
             }
         }
-        this.toHighlight()
+        this.toHighlight();
     }
 
     transform(text, lineFeed) {
-        return lineFeed ? text.replaceAll("\r\n", "\n") : text.replaceAll("\n", "\r\n")
+        return lineFeed ? text.replaceAll('\r\n', '\n') : text.replaceAll('\n', '\r\n');
     }
 }

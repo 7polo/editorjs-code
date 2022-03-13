@@ -1,10 +1,9 @@
-import {make} from "./common/utils";
-
-const base_url = 'https://cdn.jsdelivr.net/npm/prismjs@1.25.0'
-let ready = false
+import {make} from './common/utils';
+import './prismjs/prism.min.js';
+const base_url = 'https://cdn.jsdelivr.net/npm/prismjs@1.25.0';
+let ready = false;
 
 export class Highlight {
-
     defaultPlugins() {
         return {
             autoloader: {
@@ -22,17 +21,17 @@ export class Highlight {
                 css: `${base_url}/plugins/toolbar/prism-toolbar.css`,
                 js: `${base_url}/plugins/toolbar/prism-toolbar.js`
             }
-        }
+        };
     }
 
     constructor({theme, language}, config) {
         this.language = language
         this.theme = theme
         this.loadTheme(theme)
-        this.loadResource('script', `${base_url}/prism.min.js`, `js`)
+        // this.loadResource('script', `${base_url}/prism.min.js`, `js`)
         setTimeout(() => {
             this.loadPlugins(config)
-        }, 200)
+        }, 100)
     }
 
     loadPlugins(config) {
