@@ -16,9 +16,19 @@
 .code-toolbar > pre > .line-numbers-rows {
     padding-top: 1.5em !important;
     margin-top: 0 !important;
+    height: 100%;
 }
 
 div.code-toolbar > .toolbar {
     opacity: 1 !important;
+}
+
+div.code-toolbar .toolbar-item {
+    margin-left: 4px;
+    color: white;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > button:hover {
+    cursor: pointer;
 }
 

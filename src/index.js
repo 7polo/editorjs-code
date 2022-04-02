@@ -21,7 +21,7 @@ export default class Code {
 
         this.readOnly = readOnly;
 
-        this.highlight = new Highlight(this.data, this.config)
+        this.highlight = new Highlight(this.data, this.config);
     }
 
     static get sanitize() {
@@ -29,7 +29,7 @@ export default class Code {
             code: true,
             language: false,
             theme: false
-        }
+        };
     }
 
     static get toolbox() {
@@ -60,7 +60,7 @@ export default class Code {
     }
 
     render() {
-        const cls = `language-${this.data.language}`
+        const cls = `language-${this.data.language}`;
         const codeHolder = make('pre', [`code_holder line-numbers ${cls}`]);
         this.codeArea = make('code', [cls], {
             spellcheck: false,
@@ -71,28 +71,47 @@ export default class Code {
         this.codeArea.innerHTML = htmlEncode(this.data.code);
         codeHolder.appendChild(this.codeArea);
 
-        this.api.listeners.on(this.codeArea, 'input', () => this.toHighlight(), false);
+        this.bindInput();
+
         this.api.listeners.on(this.codeArea, 'paste', event => this.handlePaste(event), false);
         this.initHighlightRender();
         return codeHolder;
     }
 
+    bindInput() {
+        let allowInputEvent = false;
+        this.api.listeners.on(this.codeArea, 'input', () => {
+            if (allowInputEvent === false) {
+                this.toHighlight();
+            }
+        }, false);
+        this.api.listeners.on(this.codeArea, 'compositionstart', () => allowInputEvent = true, false);
+        this.api.listeners.on(this.codeArea, 'compositionend', () => allowInputEvent = false, false);
+        this.api.listeners.on(this.codeArea, 'keydown', (e) => {
+            if (e.keyCode === 13 && e.shiftKey) {
+                this.breakCodeBlock();
+                e.preventDefault();
+                return false;
+            }
+        }, false);
+    }
+
+    breakCodeBlock() {
+        this.api.blocks.insert();
+        this.api.caret.setToBlock(this.api.blocks.getCurrentBlockIndex());
+    }
+
     initHighlightRender() {
         const timer = setInterval(() => {
             if (this.highlight.isReady()) {
-                this.toHighlight();
+                this.toHighlight(false);
                 clearInterval(timer);
             }
         }, 50);
     }
 
-    destroy() {
-        this.api.listeners.off(this.codeArea, 'input', () => this.toHighlight(), false);
-        this.api.listeners.off(this.codeArea, 'paste', event => this.handlePaste(event), false);
-    }
-
-    toHighlight() {
-        this.highlight.toHighlight(this.codeArea);
+    toHighlight(toPosition = true) {
+        this.highlight.toHighlight(this.codeArea, toPosition);
     }
 
     handlePaste(e) {
@@ -100,7 +119,7 @@ export default class Code {
         e.preventDefault();
         // 去除复制带过来的样式
         let clp = (e.originalEvent || e).clipboardData;
-        let text = clp ? clp.getData('text/plain') : window.clipboardData.getData("text");
+        let text = clp ? clp.getData('text/plain') : window.clipboardData.getData('text');
         if (text) {
             const textNode = document.createTextNode(this.transform(text, true));
             if (window.getSelection()) {

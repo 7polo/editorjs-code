@@ -1,37 +1,36 @@
 import {make} from './common/utils';
-import './prismjs/prism.min.js';
-const base_url = 'https://cdn.jsdelivr.net/npm/prismjs@1.25.0';
+import Prism from './prismjs/prism.min.js';
+
+const baseUrl = 'https://cdn.jsdelivr.net/npm/prismjs@1.25.0';
 let ready = false;
 
 export class Highlight {
     defaultPlugins() {
         return {
             autoloader: {
-                js: `${base_url}/plugins/autoloader/prism-autoloader.min.js`
+                js: `${baseUrl}/plugins/autoloader/prism-autoloader.min.js`
             },
             'line-numbers': {
                 css: `http://file.apologizebao.cn/resource/prismjs/line-number.css`,
                 js: `http://file.apologizebao.cn/resource/prismjs/line-number.js`
             },
             'autolinker': {
-                css: `${base_url}/plugins/autolinker/prism-autolinker.css`,
-                js: `${base_url}/plugins/autolinker/prism-autolinker.min.js`
+                css: `${baseUrl}/plugins/autolinker/prism-autolinker.css`,
+                js: `${baseUrl}/plugins/autolinker/prism-autolinker.min.js`
             },
             'toolbar': {
-                css: `${base_url}/plugins/toolbar/prism-toolbar.css`,
-                js: `${base_url}/plugins/toolbar/prism-toolbar.js`
+                css: `${baseUrl}/plugins/toolbar/prism-toolbar.css`,
+                js: `${baseUrl}/plugins/toolbar/prism-toolbar.js`
             }
         };
     }
 
     constructor({theme, language}, config) {
-        this.language = language
-        this.theme = theme
-        this.loadTheme(theme)
-        // this.loadResource('script', `${base_url}/prism.min.js`, `js`)
+        Object.assign(this, {language: language, theme: theme});
+        this.loadTheme(theme);
         setTimeout(() => {
-            this.loadPlugins(config)
-        }, 100)
+            this.loadPlugins(config);
+        }, 100);
     }
 
     loadPlugins(config) {
@@ -39,50 +38,54 @@ export class Highlight {
 
         for (let name in plugins) {
 
-            const plugin = plugins[name]
+            const plugin = plugins[name];
 
             if (!plugin) {
-                continue
+                continue;
             }
             if (plugin.css) {
-                this.loadResource('link', plugin.css, `css-${name}`)
+                this.loadResource('link', plugin.css, `css-${name}`);
             }
             if (plugin.js) {
-                const load = this.loadResource('script', plugin.js, `js-${name}`)
-                if (name === "toolbar" && load) {
-                    this.toolbarButtons(10)
+                const load = this.loadResource('script', plugin.js, `js-${name}`);
+                if (name === 'toolbar' && load) {
+                    this.toolbarButtons(10);
                 }
             }
         }
     }
 
     loadResource(tag, url, id) {
-        id = `hl-${id}`
+        id = `hl-${id}`;
         if (document.querySelector(`#${id}`)) {
-            return false
+            return false;
         }
 
         const head = document.querySelector('head');
-        let attrs = {id: id}
+        let attrs = {id: id};
         if ('script' === tag) {
-            Object.assign(attrs, {src: url})
+            Object.assign(attrs, {src: url});
         } else if ('link' === tag) {
-            Object.assign(attrs, {'rel': 'stylesheet', 'href': url,})
+            Object.assign(attrs, {'rel': 'stylesheet', 'href': url,});
         }
         const dom = make(tag, [], attrs);
         if (head) head.appendChild(dom);
-        return true
+        return true;
     }
 
     loadTheme(theme) {
-        this.loadResource('link', `${base_url}/themes/prism${theme !== '' ? ('-' + theme) : ''}.css`, `theme-${theme}`)
+        this.loadResource('link', `${baseUrl}/themes/prism${theme !== '' ? ('-' + theme) : ''}.css`, `theme-${theme}`);
     }
 
-    toHighlight(el) {
-        if (Prism) {
-            const location = this.getCursorPosition(el)
-            Prism.highlightElement(el)
-            this.setCurrentCursorPosition(el, location)
+    toHighlight(el, toPosition = true) {
+        this.el = el
+        if (!Prism) {
+            return;
+        }
+        const location = this.getCursorPosition(el);
+        Prism.highlightElement(el);
+        if (toPosition) {
+            this.setCurrentCursorPosition(el, location);
         }
     }
 
@@ -91,7 +94,7 @@ export class Highlight {
         const doc = element.ownerDocument || element.document;
         const win = doc.defaultView || doc.parentWindow;
         let sel;
-        if (typeof win.getSelection != "undefined") {
+        if (typeof win.getSelection !== 'undefined') {
             sel = win.getSelection();
             if (sel.rangeCount > 0) {
                 var range = win.getSelection().getRangeAt(0);
@@ -100,7 +103,7 @@ export class Highlight {
                 preCaretRange.setEnd(range.endContainer, range.endOffset);
                 caretOffset = preCaretRange.toString().length;
             }
-        } else if ((sel = doc.selection) && sel.type != "Control") {
+        } else if ((sel = doc.selection) && sel.type !== 'Control') {
             const textRange = sel.createRange();
             const preCaretTextRange = doc.body.createTextRange();
             preCaretTextRange.moveToElementText(element);
@@ -124,7 +127,7 @@ export class Highlight {
 
     createRange(node, chars, range) {
         if (!range) {
-            range = document.createRange()
+            range = document.createRange();
             range.selectNode(node);
             range.setStart(node, 0);
         }
@@ -152,34 +155,49 @@ export class Highlight {
     }
 
     toolbarButtons(retry) {
+        const me = this;
         retry--;
         if (!(Prism && Prism.plugins.toolbar) && retry > 0) {
-            setTimeout(() => this.toolbarButtons(retry), 1000)
-            return
+            setTimeout(() => this.toolbarButtons(retry), 1000);
+            return;
         }
         retry = 0;
-        // Prism.block-editor-plugins.toolbar.registerButton('copy', {
-        //     text: 'copy', // required
-        //     onClick: function (env) { // optional
-        //         alert('This code snippet is written in ' + env.language + '.');
-        //     }
-        // });
+        Prism.plugins.toolbar.registerButton('copy', {
+            text: 'Copy',
+            onClick: function (env) {
+                me.copy(env);
+            }
+        });
         Prism.plugins.toolbar.registerButton('language', {
-            text: this.language, // required
-            onClick: function (env) { // optional
-                env.language = 'css'
+            text: this.language,
+            onClick: () => function (env) {
             }
         });
         Prism.plugins.toolbar.registerButton('theme', {
-            text: this.theme, // required
-            onClick: function (env) { // optional
-                env.language = 'css'
+            text: this.theme,
+            onClick: () => function (env) {
+                env.language = 'css';
             }
         });
-        ready = true
+        ready = true;
     }
 
     isReady() {
         return ready;
+    }
+
+    copy(env) {
+        const transfer = document.createElement('input');
+        document.body.appendChild(transfer);
+        transfer.value = env.element.textContent;
+        transfer.focus();
+        transfer.select();
+        if (document.execCommand('copy')) {
+            document.execCommand('copy');
+        }
+        transfer.blur();
+        console.log('复制成功');
+        document.body.removeChild(transfer);
+
     }
 }
